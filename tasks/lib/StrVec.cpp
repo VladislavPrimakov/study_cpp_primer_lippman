@@ -59,6 +59,17 @@ StrVec::StrVec(StrVec&& s) noexcept : elements(s.elements), first_free(s.first_f
 	s.elements = s.first_free = s.cap = nullptr;
 }
 
+StrVec& StrVec::operator=(StrVec&& rhs) noexcept {
+	if (this != &rhs) {
+		free();
+		elements = rhs.elements;
+		first_free = rhs.first_free;
+		cap = rhs.cap;
+		rhs.elements = rhs.first_free = rhs.cap = nullptr;
+	}
+	return *this;
+}
+
 StrVec::~StrVec() {
 	free();
 }
