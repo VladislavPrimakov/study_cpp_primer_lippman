@@ -21,10 +21,13 @@ class Message {
 	void remove_from_Folders();
 	void addFolder(Folder*);
 	void remFolder(Folder*);
+	void move_Folders(Message*);
 public:
-	explicit Message(const string str = "") : contents(str) {}
+	explicit Message(const string);
 	Message(const Message&);
+	Message(Message&&);
 	Message& operator=(const Message&);
+	Message& operator=(Message&&);
 	~Message();
 	void save(Folder&);
 	void remove(Folder&);

@@ -10,8 +10,8 @@ endif()
 
 project ("tasks")
 
-file(GLOB LIB_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.cpp")
 file(GLOB LIB_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.h")
+file(GLOB LIB_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/lib/*.cpp")
 add_library(Lib ${LIB_SOURCES} ${LIB_HEADERS})
 target_include_directories(Lib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 

@@ -11,17 +11,8 @@ public:
 	HasPtr(const HasPtr& other) : ps(other.ps), i(other.i), ref_count(other.ref_count) {
 		++*ref_count;
 	}
-	HasPtr& operator=(const HasPtr& other) {
-		if (this != &other) {
-			if (--*ref_count == 0) {
-				delete ps;
-				delete ref_count;
-			}
-			ref_count = other.ref_count;
-			++*ref_count;
-			ps = other.ps;
-			i = other.i;
-		}
+	HasPtr& operator=(HasPtr hp) {
+		swap(*this, hp);
 		return *this;
 	}
 	~HasPtr() {

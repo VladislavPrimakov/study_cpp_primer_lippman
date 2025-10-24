@@ -27,6 +27,12 @@ void StrVec::push_back(const string& s) {
 	++first_free;
 }
 
+void StrVec::push_back(string&& s) {
+	chk_n_alloc();
+	allocator_traits<decltype(alloc)>::construct(alloc, first_free, s);
+	++first_free;
+}
+
 pair<string*, string*> StrVec::alloc_n_copy(const string* b, const string* e) {
 	auto data = allocator_traits<decltype(alloc)>::allocate(alloc, e - b);
 	return {data, uninitialized_copy(b, e, data)};
@@ -41,6 +47,16 @@ void StrVec::free() {
 		allocator_traits<decltype(alloc)>::deallocate(alloc, elements, cap - elements);
 		elements = first_free = cap = nullptr;
 	}
+}
+
+void StrVec::reallocate() {
+	auto new_capacity = size() ? 2 * size() : 1;
+	auto new_elements = allocator_traits<decltype(alloc)>::allocate(alloc, new_capacity);
+	auto new_first_free = uninitialized_move(elements, first_free, new_elements);
+	free();
+	elements = new_elements;
+	first_free = new_first_free;
+	cap = elements + new_capacity;
 }
 
 StrVec::StrVec(const StrVec& s) {
@@ -59,6 +75,10 @@ StrVec::StrVec(StrVec&& s) noexcept : elements(s.elements), first_free(s.first_f
 	s.elements = s.first_free = s.cap = nullptr;
 }
 
+StrVec::~StrVec() {
+	free();
+}
+
 StrVec& StrVec::operator=(StrVec&& rhs) noexcept {
 	if (this != &rhs) {
 		free();
@@ -70,10 +90,6 @@ StrVec& StrVec::operator=(StrVec&& rhs) noexcept {
 	return *this;
 }
 
-StrVec::~StrVec() {
-	free();
-}
-
 StrVec& StrVec::operator=(const StrVec& rhs) {
 	auto data = alloc_n_copy(rhs.begin(), rhs.end());
 	free();
@@ -82,13 +98,95 @@ StrVec& StrVec::operator=(const StrVec& rhs) {
 	return *this;
 }
 
-void StrVec::reallocate() {
-	auto newcapacity = size() ? 2 * size() : 1;
-	auto newdata = allocator_traits<decltype(alloc)>::allocate(alloc, newcapacity);
-	auto dest = uninitialized_move(elements, first_free, newdata);
+StrVec& StrVec::operator=(initializer_list<string> il) {
+	auto data = alloc_n_copy(il.begin(), il.end());
 	free();
-	elements = newdata;
-	first_free = dest;
-	cap = elements + newcapacity;
+	elements = data.first;
+	first_free = cap = data.second;
+	return *this;
 }
 
+string& StrVec::operator[](size_t n) {
+	return elements[n];
+}
+
+const string& StrVec::operator[](size_t n) const {
+	return elements[n];
+}
+
+ostream& operator<<(ostream& os, const StrVec& v) {
+	os << "[";
+	for (size_t i = 0; i != v.size(); ++i) {
+		os << *(v.begin() + i);
+		if (i != v.size() - 1) {
+			os << ", ";
+		}
+	}
+	os << "]";
+	return os;
+}
+
+
+bool operator==(const StrVec& l, const StrVec& r) {
+	if (l.size() != r.size()) {
+		return false;
+	}
+	for (auto pl = l.begin(), pr = r.begin(); pl != l.end() || pr != r.end(); ++pl, ++pr) {
+		if (*pl != *pr) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool operator!=(const StrVec& l, const StrVec& r) {
+	return !(l == r);
+}
+
+bool operator<(const StrVec& l, const StrVec& r) {
+	if (l.size() != r.size()) {
+		return false;
+	}
+	for (auto pl = l.begin(), pr = r.begin(); pl != l.end() || pr != r.end(); ++pl, ++pr) {
+		if (*pl >= *pr) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool operator<=(const StrVec& l, const StrVec& r) {
+	if (l.size() != r.size()) {
+		return false;
+	}
+	for (auto pl = l.begin(), pr = r.begin(); pl != l.end() || pr != r.end(); ++pl, ++pr) {
+		if (*pl > *pr) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool operator>(const StrVec& l, const StrVec& r) {
+	if (l.size() != r.size()) {
+		return false;
+	}
+	for (auto pl = l.begin(), pr = r.begin(); pl != l.end() || pr != r.end(); ++pl, ++pr) {
+		if (*pl <= *pr) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool operator>=(const StrVec& l, const StrVec& r) {
+	if (l.size() != r.size()) {
+		return false;
+	}
+	for (auto pl = l.begin(), pr = r.begin(); pl != l.end() || pr != r.end(); ++pl, ++pr) {
+		if (*pl < *pr) {
+			return false;
+		}
+	}
+	return true;
+}
