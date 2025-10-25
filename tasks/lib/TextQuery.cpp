@@ -24,7 +24,16 @@ TextQuery::TextQuery(ifstream& infile) : data(make_shared<vector<string>>()), wm
 	}
 }
 
-QueryResult TextQuery::query(string& s) {
+TextQuery::TextQuery(stringstream& ss) : data(make_shared<vector<string>>()), wm(make_shared<map<string, shared_ptr<vector<size_t>>>>()) {
+	string line;
+	size_t line_no = 0;
+	while (getline(ss, line)) {
+		buildMap(line, line_no);
+		++line_no;
+	}
+}
+
+QueryResult TextQuery::query(const string& s) const {
 	auto it = wm->find(s);
 	if (it == wm->end()) {
 		return QueryResult(data, make_shared<vector<size_t>>(), s);
@@ -62,4 +71,49 @@ void runQueries(ifstream& infile) {
 		if (!(cin >> s) || s == "q") break;
 		print(cout, tq.query(s)) << endl;
 	}
+}
+
+QueryResult Query::eval(const TextQuery& t) const {
+	return q->eval(t);
+}
+
+string Query::rep() const {
+	return q->rep();
+}
+
+QueryResult WordQuery::eval(const TextQuery& t) const {
+	return t.query(query_word);
+}
+
+QueryResult OrQuery::eval(const TextQuery& tq) const {
+	auto right = rhs.eval(tq), left = lhs.eval(tq);
+	auto result = make_shared<vector<size_t>>(left.begin(), left.end());
+	result->insert(result->end(), right.begin(), right.end());
+	sort(result->begin(), result->end());
+	unique(result->begin(), result->end());
+	return QueryResult(left.getFile(), result, rep());
+}
+
+QueryResult AndQuery::eval(const TextQuery& tq) const {
+	auto left = lhs.eval(tq), right = rhs.eval(tq);
+	auto result = make_shared<vector<size_t>>();
+	set_intersection(left.begin(), left.end(), right.begin(), right.end(), back_inserter(*result));
+	return QueryResult(left.getFile(), result, rep());
+}
+
+QueryResult NotQuery::eval(const TextQuery& tq) const {
+	auto qr = query.eval(tq);
+	auto it_beg = qr.begin();
+	auto it_end = qr.end();
+	auto result = make_shared<vector<size_t>>();
+	auto sz = qr.getFile()->size();
+	for (size_t current_num = 0; current_num < sz; ++current_num) {
+		if (it_beg == it_end || *it_beg != current_num) {
+			result->push_back(current_num);
+		}
+		while (it_beg != it_end && *it_beg == current_num) {
+			++it_beg;
+		}
+	}
+	return QueryResult(qr.getFile(), result, rep());
 }
