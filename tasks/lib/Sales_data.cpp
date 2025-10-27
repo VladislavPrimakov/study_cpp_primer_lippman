@@ -64,7 +64,7 @@ ostream& print(ostream& os, const Sales_data& item) {
 	return os;
 }
 
-Sales_data::Sales_data(const string& s, unsigned n, double p) : bookNo(s), units_sold(n), revenue(p* n) {}
+Sales_data::Sales_data(const string& s, size_t n, double p) : bookNo(s), units_sold(n), revenue(p* n) {}
 
 Sales_data::Sales_data(const string& s) : Sales_data(s, {}, {}) {}
 
@@ -103,4 +103,11 @@ Sales_data& Sales_data::operator +=(const Sales_data& other) {
 Sales_data& Sales_data::operator =(const string& isbn) {
 	bookNo = isbn;
 	return *this;
+}
+
+bool operator ==(const Sales_data& lhs, const Sales_data& rhs) {
+	return lhs.bookNo == rhs.bookNo &&
+		lhs.units_sold == rhs.units_sold &&
+		lhs.revenue == rhs.revenue;
+
 }

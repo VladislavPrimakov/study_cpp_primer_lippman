@@ -3,17 +3,20 @@
 
 #include <string>
 #include <iostream>
-
 using namespace std;
 
+template <class T> struct std::hash;
+
 class Sales_data {
+	friend struct std::hash<Sales_data>;
 	friend Sales_data add(const Sales_data&, const Sales_data&);
 	friend ostream& print(ostream&, const Sales_data&);
 	friend istream& read(istream&, Sales_data&);
 	friend istream& operator >>(istream&, Sales_data&);
 	friend ostream& operator <<(ostream&, const Sales_data&);
+	friend bool operator ==(const Sales_data&, const Sales_data&);
 public:
-	Sales_data(const string&, unsigned, double);
+	Sales_data(const string&, size_t, double);
 	Sales_data() : Sales_data({}, {}, {}) {};
 	Sales_data(const string&);
 	Sales_data(istream&);
@@ -25,7 +28,7 @@ public:
 	Sales_data& operator =(const string&);
 private:
 	string bookNo;
-	unsigned units_sold = 0;
+	size_t units_sold = 0;
 	double revenue = 0.0;
 };
 
@@ -34,5 +37,17 @@ ostream& print(ostream&, const Sales_data&);
 istream& read(istream&, Sales_data&);
 istream& operator >>(istream&, Sales_data&);
 ostream& operator <<(ostream&, const Sales_data&);
+bool operator ==(const Sales_data&, const Sales_data&);
+
+namespace std {
+	template<>
+	struct hash<Sales_data> {
+		typedef size_t result_type;
+		typedef Sales_data argument_type;
+		size_t operator()(const Sales_data& s) const {
+			return hash<string>()(s.bookNo) ^ hash<size_t>()(s.units_sold) ^ hash<double>()(s.revenue);
+		}
+	};
+}
 
 #endif

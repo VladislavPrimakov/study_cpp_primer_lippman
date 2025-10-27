@@ -28,6 +28,7 @@ public:
 	const T& operator[](size_t) const;
 	void push_back(const T&);
 	void push_back(T&&);
+	template <typename... Args> void emplace_back(Args&&...);
 	size_t size() const;
 	size_t capacity() const;
 	T* begin() const;
@@ -79,9 +80,18 @@ void Vec<T>::push_back(const T& s) {
 template <typename T>
 void Vec<T>::push_back(T&& s) {
 	chk_n_alloc();
-	allocator_traits<decltype(alloc)>::construct(alloc, first_free, std::move(s));
+	allocator_traits<decltype(alloc)>::construct(alloc, first_free, move(s));
 	++first_free;
 }
+
+template <typename T>
+template <typename... Args>
+void Vec<T>::emplace_back(Args&&... args) {
+	chk_n_alloc();
+	allocator_traits<decltype(alloc)>::construct(alloc, first_free, forward<Args>(args)...);
+	++first_free;
+}
+
 
 template <typename T>
 pair<T*, T*> Vec<T>::alloc_n_copy(const T* b, const T* e) {
