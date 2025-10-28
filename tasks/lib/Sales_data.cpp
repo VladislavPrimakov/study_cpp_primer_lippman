@@ -111,3 +111,7 @@ bool operator ==(const Sales_data& lhs, const Sales_data& rhs) {
 		lhs.revenue == rhs.revenue;
 
 }
+
+bool operator <(const Sales_data& lhs, const Sales_data& rhs) {
+	return lhs.bookNo < rhs.bookNo;
+}

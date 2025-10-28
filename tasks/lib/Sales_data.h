@@ -15,6 +15,7 @@ class Sales_data {
 	friend istream& operator >>(istream&, Sales_data&);
 	friend ostream& operator <<(ostream&, const Sales_data&);
 	friend bool operator ==(const Sales_data&, const Sales_data&);
+	friend bool operator <(const Sales_data&, const Sales_data&);
 public:
 	Sales_data(const string&, size_t, double);
 	Sales_data() : Sales_data({}, {}, {}) {};
@@ -38,6 +39,8 @@ istream& read(istream&, Sales_data&);
 istream& operator >>(istream&, Sales_data&);
 ostream& operator <<(ostream&, const Sales_data&);
 bool operator ==(const Sales_data&, const Sales_data&);
+bool operator <(const Sales_data&, const Sales_data&);
+
 
 namespace std {
 	template<>
