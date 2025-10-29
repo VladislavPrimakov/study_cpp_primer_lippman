@@ -1,17 +1,3 @@
-//Упражнение 7.23.Напишите собственную версию класса Screen.
-
-//Упражнение 7.24.Добавьте в свой класс Screen три конструктора :
-//стандартный; получающий высоту, ширину и заполняющий содержимое
-//соответствующим количеством пробелов; получающий высоту, ширину и
-//заполняющий символ для содержимого экрана.
-
-//Упражнение 7.27.Добавьте функции move(), set() и display() в свою
-//версию класса Screen.Проверьте свой класс, выполнив следующий код :
-
-//Упражнение 7.32.Определите собственные версии классов Screen и window_
-//mgr, в которых функция clear() является членом класса Windowmgr и
-//другом класса Screen.
-
 #include <iostream>
 #include <string>
 #include <vector>
@@ -38,3 +24,21 @@ class Windowmgr {
 private:
 	vector<class Screen> screens {Screen(24, 80, ' ')};
 };
+
+void Windowmgr::clear(size_t i) {
+	Screen& s = screens[i];
+	s.contents = string(s.height * s.width, ' ');
+}
+
+Screen& Screen::move(size_t r, size_t c) {
+	cursor = r * width + c;
+	return *this;
+}
+Screen& Screen::set(char c) {
+	contents[cursor] = c;
+	return *this;
+}
+Screen& Screen::display(ostream& os) {
+	os << contents;
+	return *this;
+}

@@ -317,7 +317,12 @@ T* BlobPtr<T>::operator->() const {
 
 template<typename T>
 bool operator==(const BlobPtr<T>& l, const BlobPtr<T>& r) {
-	return l.deref() == r.deref();
+	auto l_shared = l.wptr.lock();
+	auto r_shared = r.wptr.lock();
+	if (l_shared == nullptr || r_shared == nullptr) {
+		throw runtime_error("unbound Blob");
+	}
+	return l_shared == r_shared && l.curr == r.curr;
 }
 
 template<typename T>
@@ -327,22 +332,29 @@ bool operator!=(const BlobPtr<T>& l, const BlobPtr<T>& r) {
 
 template<typename T>
 bool operator<(const BlobPtr<T>& l, const BlobPtr<T>& r) {
-	return l.deref() < r.deref();
+	auto l_shared = l.wptr.lock();
+	auto r_shared = r.wptr.lock();
+	if (l_shared == nullptr || r_shared == nullptr) {
+		throw runtime_error("unbound Blob");
+	}
+	if (l_shared != r_shared)
+		return false;
+	return l.curr < r.curr;
 }
 
 template<typename T>
 bool operator<=(const BlobPtr<T>& l, const BlobPtr<T>& r) {
-	return l.deref() <= r.deref();
+	return (l < r) || (l == r);
 }
 
 template<typename T>
 bool operator>(const BlobPtr<T>& l, const BlobPtr<T>& r) {
-	return l.deref() > r.deref();
+	return r < l;
 }
 
 template<typename T>
 bool operator>=(const BlobPtr<T>& l, const BlobPtr<T>& r) {
-	return l.deref() >= r.deref();
+	return (r < l) || (r == l);;
 }
 
 #endif // !BLOB_H

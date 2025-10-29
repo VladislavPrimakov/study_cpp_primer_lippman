@@ -1,4 +1,5 @@
-//Упражнение 7.57.Напишите собственную версию класса Account.
+#ifndef ACCOUNT_H
+#define ACCOUNT_H
 
 #include <string>
 #include <vector>
@@ -25,3 +26,5 @@ private:
 		interestRate = 0.025;
 	}
 };
+
+#endif // !ACCOUNT_H

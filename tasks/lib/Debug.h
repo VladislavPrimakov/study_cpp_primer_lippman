@@ -1,5 +1,5 @@
-//”пражнение 7.53.ќпределите собственную версию класса Debug.
-
+#ifndef DEBUG_H
+#define DEBUG_H
 
 class Debug {
 public:
@@ -23,3 +23,5 @@ private:
 	bool io; // ошибка 10
 	bool other; // другие ошибки
 };
+
+#endif // !DEBUG_H

@@ -56,19 +56,21 @@ private:
 
 class WordQuery : public Query_base {
 	friend class Query;
+protected:
+	string query_word;
+public:
 	WordQuery(const string& s) : query_word(s) {}
 	QueryResult eval(const TextQuery& t) const;
 	string rep() const {
 		return query_word;
 	}
-	string query_word;
 };
 
 class Query {
 	friend Query operator~(const Query&);
 	friend Query operator|(const Query&, const Query&);
 	friend Query operator&(const Query&, const Query&);
-
+protected:
 	Query(shared_ptr<Query_base> query) : q(query) {}
 	shared_ptr<Query_base> q;
 public:
@@ -80,12 +82,14 @@ public:
 
 class NotQuery : public Query_base {
 	friend Query operator~(const Query&);
+protected:
+	Query query;
+public:
 	NotQuery(const Query& q) : query(q) {}
 	string rep() const {
 		return "~(" + query.rep() + ")";
 	}
 	QueryResult eval(const TextQuery&) const;
-	Query query;
 };
 
 inline Query operator~(const Query& operand) {
@@ -94,16 +98,18 @@ inline Query operator~(const Query& operand) {
 
 class BinaryQuery : public Query_base {
 protected:
+	Query lhs, rhs;
+	string opSym;
+public:
 	BinaryQuery(const Query& l, const Query& r, string s) : lhs(l), rhs(r), opSym(s) {}
 	string rep() const {
 		return "(" + lhs.rep() + " " + opSym + " " + rhs.rep() + ") ";
 	}
-	Query lhs, rhs;
-	string opSym;
 };
 
 class AndQuery : public BinaryQuery {
 	friend Query operator&(const Query&, const Query&);
+public:
 	AndQuery(const Query& left, const Query& right) : BinaryQuery(left, right, "&") {}
 	QueryResult eval(const TextQuery&) const;
 };
@@ -114,6 +120,7 @@ inline Query operator&(const Query& lhs, const Query& rhs) {
 
 class OrQuery : public BinaryQuery {
 	friend Query operator|(const Query&, const Query&);
+public:
 	OrQuery(const Query& left, const Query& right) : BinaryQuery(left, right, "|") {}
 	QueryResult eval(const TextQuery&) const;
 };
